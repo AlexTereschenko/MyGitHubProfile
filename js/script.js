@@ -12,7 +12,8 @@ let locations = document.getElementById('location');
 
 
 inputUserNameField.addEventListener("input", function() {
-    userName = inputUserNameField.value ? document.getElementById('githubUserName').value : 'AlexTereschenko';
+    inputUnspaced = [...document.getElementById('githubUserName').value].filter(e => e !== ' ').join('');
+    userName = inputUserNameField.value ? inputUnspaced : 'AlexTereschenko';
 })
 
 formElem.onsubmit = async (e) => {
@@ -25,16 +26,16 @@ async function fetchRepos() {
     loading.classList.remove('hide');
     try {
         let response = await fetch(`https://api.github.com/users/${userName}/repos`)
-        if (!response.status === '403') {
-            throw new Error('403 is unacceptalble for me');
-        }
-        if (!response.status === '404') {
-            throw new Error('404 ohh no');
-        }
+        // if (response.status === '403') {
+        //     throw new Error('403 is unacceptalble for me');
+        // }
+        // if (response.status === '404') {
+        //     throw new Error('404 ohh no');
+        // }
         if (!response.ok) {
-            throw new Error('200-299 Sorry, the specified user does not exist');
-        }
-        let body = await response.json();
+            throw new Error('Sorry, the specified user does not exist');
+        }  
+        let body = await response.json(); 
         repositories = body;
         loading.classList.add('hide');
 
@@ -44,8 +45,8 @@ async function fetchRepos() {
         getLocation()
         addRepos();
     } 
-    catch (err) {
-        console.log(err);
+    catch (error) {
+        console.log(error);
     }
 }
 
@@ -54,29 +55,53 @@ function getName() {
 }
 
 function getPhoto() {
-    logo.src = repositories[0].owner.avatar_url;
+    try {
+        logo.src = repositories[0].owner.avatar_url;
+    }
+    catch {
+        logo.src = 'img/userDefault.png';
+        alert('Sorry, the specified user does not exist');
+    }
 }
 
 function getLanguages() {
-    let langArr = [];
-    for (let i = 0; i < repositories.length; i++) {
-        langArr.push(repositories[i].language)
+    try {
+        let langArr = [];
+        for (let i = 0; i < repositories.length; i++) {
+            langArr.push(repositories[i].language)
+        }
+        let uniqueLanguages = (langArr.filter((value, index, self) => ((self.indexOf(value) === index) && (value !== null)))).join(', ')
+        languages.innerHTML = uniqueLanguages;
     }
-    let uniqueLanguages = (langArr.filter((value, index, self) => ((self.indexOf(value) === index) && (value !== null)))).join(', ')
-    languages.innerHTML = uniqueLanguages;
+    catch {
+        languages.innerHTML = 'not defined';
+    }
+    
 }
 
 async function getLocation() {
     loading.classList.remove('hide');
 
-    await fetch(`https://api.github.com/users/${userName}`)
-    .then((response) => {
-        return response.json();
-    })
-    .then((data) => {
-        locations.innerHTML = data.location ? data.location : 'not declared';
-        loading.classList.add('hide');
-    });
+    try {
+        await fetch(`https://api.github.com/users/${userName}`)
+        .then((response) => {
+            // if (response.status === '404') {
+            //     throw new Error('404 ohh no');
+            // }
+            return response.json();
+        })
+        .then((data) => {
+            locations.innerHTML = data.location ? data.location : 'not declared';
+            loading.classList.add('hide');
+        });
+
+        
+    }
+    catch {
+        // console.log('404 ohh no');
+    }
+
+    
 }
 
 function addRepos() {
@@ -114,7 +139,7 @@ async function getLastCommitDate(repo, secondBlock) {
         return response.json();
     })
     .then((data) => {
-        let lastCommit = document.createTextNode(data[0].commit.author.date);
+        let lastCommit = document.createTextNode(`Last committed at ${data[0].commit.author.date}`);
         // let lastCommit = document.createTextNode(new Date(data[0].commit.author.date));
         secondBlock.appendChild(lastCommit);
         loading.classList.add('hide');
