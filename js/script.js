@@ -25,9 +25,14 @@ async function fetchRepos() {
     loading.classList.remove('hide');
     try {
         let response = await fetch(`https://api.github.com/users/${userName}/repos`)
+        if (!response.status === '403') {
+            throw new Error('403 is unacceptalble for me');
+        }
+        if (!response.status === '404') {
+            throw new Error('404 ohh no');
+        }
         if (!response.ok) {
-            const message = `An error has occured: ${response.status}`;
-            throw new Error(message);
+            throw new Error('200-299 Sorry, the specified user does not exist');
         }
         let body = await response.json();
         repositories = body;
@@ -40,7 +45,7 @@ async function fetchRepos() {
         addRepos();
     } 
     catch (err) {
-        alert('Sorry, the specified user does not exist. Please enter another username, you have been redirected to the home page');
+        console.log(err);
     }
 }
 
