@@ -12,7 +12,7 @@ let locations = document.getElementById('location');
 
 
 inputUserNameField.addEventListener("input", function() {
-    inputUnspaced = [...document.getElementById('githubUserName').value].filter(e => e !== ' ').join('');
+    let inputUnspaced = [...document.getElementById('githubUserName').value].filter(e => e !== ' ').join('');
     userName = inputUserNameField.value ? inputUnspaced : 'AlexTereschenko';
 })
 
