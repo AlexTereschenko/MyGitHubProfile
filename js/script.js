@@ -26,12 +26,6 @@ async function fetchRepos() {
     loading.classList.remove('hide');
     try {
         let response = await fetch(`https://api.github.com/users/${userName}/repos`)
-        // if (response.status === '403') {
-        //     throw new Error('403 is unacceptalble for me');
-        // }
-        // if (response.status === '404') {
-        //     throw new Error('404 ohh no');
-        // }
         if (!response.ok) {
             throw new Error('Sorry, the specified user does not exist');
         }  
@@ -85,23 +79,21 @@ async function getLocation() {
     try {
         await fetch(`https://api.github.com/users/${userName}`)
         .then((response) => {
-            // if (response.status === '404') {
-            //     throw new Error('404 ohh no');
-            // }
+            if (!response.ok) {
+                throw new Error('ohh no wrong username');
+            }
             return response.json();
         })
         .then((data) => {
             locations.innerHTML = data.location ? data.location : 'not declared';
             loading.classList.add('hide');
         });
-
-        
     }
-    catch {
-        // console.log('404 ohh no');
+    catch (error) {
+        locations.innerHTML = null;
+        loading.classList.add('hide');
+        // console.log(error);
     }
-
-    
 }
 
 function addRepos() {
@@ -123,7 +115,8 @@ function addRepos() {
         let secondBlock = document.createElement('div');
         secondBlock.classList.add('closed');
         secondBlock.classList.add('time-container');
-        getLastCommitDate(repositories[i].name, secondBlock);
+        let lastCommit = document.createTextNode('');
+        secondBlock.appendChild(lastCommit);
         
         li.appendChild(firstBlock);
         li.appendChild(secondBlock);
@@ -132,16 +125,14 @@ function addRepos() {
     }
 }
 
-async function getLastCommitDate(repo, secondBlock) {
+async function getLastCommitDate(repo, timeBlock) {
     loading.classList.remove('hide');
     return await fetch(`https://api.github.com/repos/${userName}/${repo}/commits`)
     .then((response) => {
         return response.json();
     })
     .then((data) => {
-        let lastCommit = document.createTextNode(`Last committed at ${data[0].commit.author.date}`);
-        // let lastCommit = document.createTextNode(new Date(data[0].commit.author.date));
-        secondBlock.appendChild(lastCommit);
+        timeBlock.innerHTML = `Last committed at ${data[0].commit.author.date}`;
         loading.classList.add('hide');
     });
 }
@@ -150,11 +141,16 @@ repos.addEventListener('click', function(event) {
     if (event.target.tagName === 'P') {
         event.target.lastChild.classList.toggle('rotate-onclick');
         event.target.nextElementSibling.classList.toggle('closed');
-    } else {
-        if (event.target.tagName === 'SPAN') {
-            event.target.classList.toggle('rotate-onclick');
-            event.target.parentElement.nextElementSibling.classList.toggle('closed');
-        }
+        if (event.target.nextElementSibling.textContent === '') {
+            getLastCommitDate(event.target.firstChild.textContent, event.target.nextElementSibling);
+        };
+    }
+    if (event.target.tagName === 'SPAN') {
+        event.target.classList.toggle('rotate-onclick');
+        event.target.parentElement.nextElementSibling.classList.toggle('closed');
+        if (event.target.parentElement.nextElementSibling.textContent === '') {
+            getLastCommitDate(event.target.parentElement.firstChild.textContent, event.target.parentElement.nextElementSibling);
+        };
     }
 });
 
