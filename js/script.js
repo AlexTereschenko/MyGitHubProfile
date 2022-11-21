@@ -138,17 +138,26 @@ async function getLastCommitDate(repo, timeBlock) {
 }
 
 repos.addEventListener('click', function(event) {
+    let timeOfClick = new Date().getTime();
+    let timeDiff = (timeOfClick - event.target.nextElementSibling.dataset.LastRequestTime)>60000;
+
     if (event.target.tagName === 'P') {
         event.target.lastChild.classList.toggle('rotate-onclick');
         event.target.nextElementSibling.classList.toggle('closed');
-        if (event.target.nextElementSibling.textContent === '') {
+        if(!event.target.nextElementSibling.dataset.LastRequestTime || timeDiff) {
+            event.target.nextElementSibling.dataset.LastRequestTime = timeOfClick;
+        };
+        if (event.target.nextElementSibling.textContent === '' || timeDiff) {
             getLastCommitDate(event.target.firstChild.textContent, event.target.nextElementSibling);
         };
     }
     if (event.target.tagName === 'SPAN') {
         event.target.classList.toggle('rotate-onclick');
         event.target.parentElement.nextElementSibling.classList.toggle('closed');
-        if (event.target.parentElement.nextElementSibling.textContent === '') {
+        if(!event.target.parentElement.nextElementSibling.dataset.LastRequestTime || timeDiff) {
+            event.target.parentElement.nextElementSibling.dataset.LastRequestTime = timeOfClick;
+        };
+        if (event.target.parentElement.nextElementSibling.textContent === '' || timeDiff) {
             getLastCommitDate(event.target.parentElement.firstChild.textContent, event.target.parentElement.nextElementSibling);
         };
     }
