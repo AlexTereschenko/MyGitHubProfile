@@ -26,9 +26,9 @@ async function fetchRepos() {
     loading.classList.remove('hide');
     try {
         let response = await fetch(`https://api.github.com/users/${userName}/repos`)
-        if (!response.ok) {
-            throw new Error('Sorry, the specified user does not exist');
-        }  
+        // if (!response.ok) {
+        //     throw new Error('Sorry, the specified user does not exist');
+        // }  
         let body = await response.json(); 
         repositories = body;
         loading.classList.add('hide');
@@ -40,7 +40,7 @@ async function fetchRepos() {
         addRepos();
     } 
     catch (error) {
-        console.log(error);
+        // console.log(error);
     }
 }
 
@@ -79,9 +79,9 @@ async function getLocation() {
     try {
         await fetch(`https://api.github.com/users/${userName}`)
         .then((response) => {
-            if (!response.ok) {
-                throw new Error('ohh no wrong username');
-            }
+            // if (!response.ok) {
+            //     throw new Error('ohh no wrong username');
+            // }
             return response.json();
         })
         .then((data) => {
@@ -93,6 +93,10 @@ async function getLocation() {
         locations.innerHTML = null;
         loading.classList.add('hide');
         // console.log(error);
+        // console.error('Error:', error);
+        // return error; // or you can return null;
+        // return null;
+
     }
 }
 
