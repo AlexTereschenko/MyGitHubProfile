@@ -31,19 +31,19 @@
     max-width: 288px;
 }
 
-.form {
+.get-name-form {
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
-.form-control {
+.get-name-form__input {
     text-align: center;
     line-height: 2;
     color: #000000;
 }
 
-.btn {
+.get-name-form__btn {
     color: #000000;
     line-height: 2;
     cursor: pointer;
@@ -69,6 +69,8 @@
 }
 
 h1 {
+    /* for self education use */
+    /* font-size: clamp(1.2rem, 0.5vw + 1rem, 2rem); */
     font-size: 1.7rem;
     line-height: 1.2;
     text-transform: uppercase;
@@ -102,7 +104,7 @@ h2 {
     font-weight: bold;
     position: absolute;
     transform: translateX(0.5rem);
-  }
+}
 
 .repository__name {
     display: flex;
@@ -137,7 +139,6 @@ h2 {
     background: #000000;
     font-size: 0.8rem;
     line-height: 2;
-    /* margin-left: -1.6rem; */
     padding-left: 1.6rem;
     cursor: auto;
     border-bottom: 1px solid grey;
