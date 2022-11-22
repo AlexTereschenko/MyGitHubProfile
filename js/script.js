@@ -1,18 +1,16 @@
 let inputUserNameField = document.getElementById('githubUserName');
 let userName = 'AlexTereschenko';
-let getBtn = document.getElementById('get-btn');
-const requestURL = 'https://api.github.com/users/';
-let repos = document.getElementById('repos');
+const requestURL = 'https://api.github.com/';
+let repositoriesList = document.getElementById('repositories');
 let repositories;
 let loading = document.querySelector('.loading');
-let nameSpan = document.getElementById('name');
 let logo = document.getElementById('photo');
-let languages = document.getElementById('languages');
+let languagesList = document.getElementById('languages');
 let locations = document.getElementById('location');
 
 
 inputUserNameField.addEventListener('input', function() {
-    let inputUnspaced = [...document.getElementById('githubUserName').value].filter(e => e !== ' ').join('');
+    let inputUnspaced = [...inputUserNameField.value].filter(e => e !== ' ').join('');
     userName = inputUserNameField.value ? inputUnspaced : 'AlexTereschenko';
 })
 
@@ -23,18 +21,18 @@ formElem.onsubmit = async (e) => {
 };
 
 async function fetchRepos() {
-    loading.classList.remove('hide');
+    loadingScreenAdder()
     try {
-        let response = await fetch(requestURL+userName+'/repos')
+        let response = await fetch(`${requestURL}users/${userName}/repos`)
         let body = await response.json(); 
         repositories = body;
-        loading.classList.add('hide');
 
+        loadingScreenRemover();
         getPhoto();
         getName();
         getLanguages();
         getLocation()
-        addRepos();
+        addRepositories();
     } 
     catch {
         return null;
@@ -42,7 +40,7 @@ async function fetchRepos() {
 }
 
 function getName() {
-    nameSpan.innerHTML = userName;
+    document.getElementById('name').innerHTML = userName;
 }
 
 function getPhoto() {
@@ -51,7 +49,7 @@ function getPhoto() {
     }
     catch {
         logo.src = 'img/userDefault.png';
-        alert('Sorry, the specified user does not exist, you will be redirected to main page');
+        alert('Sorry, the specified user does not exist');
     }
 }
 
@@ -62,105 +60,121 @@ function getLanguages() {
             langArr.push(repositories[i].language)
         }
         let uniqueLanguages = (langArr.filter((value, index, self) => ((self.indexOf(value) === index) && (value !== null)))).join(', ')
-        languages.innerHTML = uniqueLanguages;
+        languagesList.innerHTML = uniqueLanguages;
     }
     catch {
-        languages.innerHTML = 'not defined';
+        languagesList.innerHTML = 'not defined';
     }
     
 }
 
 async function getLocation() {
-    loading.classList.remove('hide');
+    loadingScreenAdder()
 
     try {
-        await fetch(requestURL+userName)
+        await fetch(`${requestURL}users/${userName}`)
         .then((response) => {
         if (response.status === 404) {
-            window.open('/', '_self'); //just a patch to avoid creating a separate 404 page
+            throw new Error();
         } 
             return response.json();
         })
         .then((data) => {
             locations.innerHTML = data.location ? data.location : 'not declared';
-            loading.classList.add('hide');
+            loadingScreenRemover();
         });
     }
     catch {
         locations.innerHTML = null;
-        loading.classList.add('hide');
+        loadingScreenRemover();
+        userName = '404 invalid userName ;)';
+        getName();
     }
 }
 
-function addRepos() {
-    repos.innerHTML = '';
+function addRepositories() {
+    repositoriesList.innerHTML = '';
     for (let i = 0; i < repositories.length; i++) {
         let li = document.createElement('li');
         li.className = 'repository';
 
-        let firstBlock = document.createElement('p');
-        firstBlock.classList.add('repository__name');
-        let name = document.createTextNode(repositories[i].name);
-        let spanArrow = document.createElement('span');
-        spanArrow.classList.add('btn');
-        let spanText = document.createTextNode('expand_more');
-        spanArrow.appendChild(spanText);
-        spanArrow.classList.add('material-symbols-outlined');
-        spanArrow.classList.add('unselectable');
-        spanArrow.classList.add('repository__name__icon');
-        firstBlock.appendChild(name);
-        firstBlock.appendChild(spanArrow);
-        let secondBlock = document.createElement('div');
-        secondBlock.classList.add('closed');
-        secondBlock.classList.add('time-container');
-        let lastCommit = document.createTextNode('');
-        secondBlock.appendChild(lastCommit);
-        
-        li.appendChild(firstBlock);
-        li.appendChild(secondBlock);
+        let p = document.createElement('p');
+        p.classList.add('repository__name');
+        let nameTextNode = document.createTextNode(repositories[i].name);
+        p.appendChild(nameTextNode);
 
-        repos.appendChild(li);
+        let span = document.createElement('span');
+        let arrowTextNode = document.createTextNode('expand_more');
+        span.appendChild(arrowTextNode);
+        span.classList.add('arrow');
+        span.classList.add('material-symbols-outlined');
+        span.classList.add('unselectable');
+        span.classList.add('repository__name__icon');
+        span.classList.add('chocolate');
+
+        p.appendChild(span);
+
+        let div = document.createElement('div');
+        div.classList.add('closed');
+        div.classList.add('time-container');
+        let lastCommitTextNode = document.createTextNode('');
+        div.appendChild(lastCommitTextNode);
+        
+        li.appendChild(p);
+        li.appendChild(div);
+
+        repositoriesList.appendChild(li);
     }
 }
 
-async function getLastCommitDate(repo, timeBlock) {
-    loading.classList.remove('hide');
-    return await fetch(`https://api.github.com/repos/${userName}/${repo}/commits`)
+async function getLastCommitDate(repo, div) {
+    loadingScreenAdder()
+    await fetch(`${requestURL}repos/${userName}/${repo}/commits`)
     .then((response) => {
         return response.json();
     })
     .then((data) => {
-        timeBlock.innerHTML = `Last committed at ${data[0].commit.author.date}`;
-        loading.classList.add('hide');
+        div.innerHTML = `Last committed at ${data[0].commit.author.date}`;
+        loadingScreenRemover();
     });
 }
 
-repos.addEventListener('click', function(event) {
+repositoriesList.addEventListener('click', function(event) {
+    let clickedEl = event.target;
     const delay = 60000;
     let timeOfClick = new Date().getTime();
 
-    if (event.target.classList.contains('repository__name')) {
-        clickChecking(event.target);
+    if (clickedEl.classList.contains('repository__name')) {
+        clickChecking(clickedEl);
     }
-    if (event.target.classList.contains('repository__name__icon')) {
-        clickChecking(event.target.parentElement);
+    if (clickedEl.classList.contains('repository__name__icon')) {
+        clickChecking(clickedEl.parentElement);
     }
 
     function clickChecking(clickTarget) {
-        let lastRequestTime = clickTarget.nextElementSibling.dataset.LastRequestTime;
+        let nextToTarget = clickTarget.nextElementSibling;
+        let lastRequestTime = nextToTarget.dataset.LastRequestTime;
         let timeDiff = (timeOfClick - lastRequestTime)>delay;
 
         clickTarget.lastChild.classList.toggle('rotate-onclick');
-        clickTarget.nextElementSibling.classList.toggle('closed');
+        nextToTarget.classList.toggle('closed');
 
         if(!lastRequestTime || timeDiff) {
             lastRequestTime = timeOfClick;
         };
-        if (clickTarget.nextElementSibling.textContent === '' || timeDiff) {
-            getLastCommitDate(clickTarget.firstChild.textContent, clickTarget.nextElementSibling);
+        if (nextToTarget.textContent === '' || timeDiff) {
+            getLastCommitDate(clickTarget.firstChild.textContent, nextToTarget);
         };
     }
 });
+
+function loadingScreenAdder() {
+    loading.classList.remove('hide');
+}
+
+function loadingScreenRemover() {
+    loading.classList.add('hide');
+}
 
 
 document.addEventListener('DOMContentLoaded', fetchRepos());

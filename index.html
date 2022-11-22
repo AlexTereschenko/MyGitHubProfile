@@ -18,79 +18,71 @@
 
 <body>
     <div class="wrapper">
-        <header>
-            <form id="formElem">
-                <input type="text" id="githubUserName" placeholder="Insert your GitHub UserName">
-                <button type="submit" id="get-btn">Get your GitHub repositories</button>
+        <header class="header">
+            <form id="formElem" class="form">
+                <input type="text" id="githubUserName" placeholder="Insert your GitHub UserName" class="form-control">
+                <button type="submit" class="btn">Get your GitHub repositories</button>
             </form>
 
             <h1 class="unselectable">My GitHub Profile</h1>
-            <p>Hi, my name is <span id="name">AlexTereschenko</span></p>
-            <img src="https://avatars.githubusercontent.com/u/105982451?v=4" alt="photo" id="photo">
-            <p>I'm learning <span id="languages">HTML, CSS, JavaScript</span></p>
-            <p>Location: <span id="location">Ukraine Cherkasy</span></p>
+            <p>Hi, my name is <span id="name" class="chocolate">AlexTereschenko</span></p>
+            <img src="https://avatars.githubusercontent.com/u/105982451?v=4" alt="photo" id="photo" class="user-photo">
+            <p>I'm learning <span id="languages" class="chocolate">HTML, CSS, JavaScript</span></p>
+            <p>Location: <span id="location" class="chocolate">Ukraine Cherkasy</span></p>
         </header>
 
-        <main>
+        <main class="main">
             <article>
                 <section>
                     <p>And here you can view</p>
-                    <h2><span>My GitHib repositories:</span></h2>
-                    <ul id="repos">
+                    <h2><span class="chocolate">My GitHib repositories:</span></h2>
+                    <ul id="repositories" class="repositories">
                         <li class="repository">
-                            <p>AlexTereschenko<span
-                                    class="btn material-symbols-outlined unselectable">expand_more</span></p>
+                            <p class="repository__name">AlexTereschenko<span class="arrow material-symbols-outlined unselectable repository__name__icon chocolate">expand_more</span></p>
                             <div class="time-container closed">2022-08-01T01:08:46Z</div>
                         </li>
                         <li class="repository">
-                            <p>Alina-s-site<span class="btn material-symbols-outlined unselectable">expand_more</span>
-                            </p>
+                            <p class="repository__name">Alina-s-site<span class="arrow material-symbols-outlined unselectable repository__name__icon chocolate">expand_more</span></p>
                             <div class="time-container closed">2022-08-22T10:55:05Z</div>
                         </li>
                         <li class="repository">
-                            <p>atestation<span class="btn material-symbols-outlined unselectable">expand_more</span></p>
+                            <p class="repository__name">atestation<span class="arrow material-symbols-outlined unselectable repository__name__icon chocolate">expand_more</span></p>
                             <div class="time-container closed">2022-08-29T11:51:08Z</div>
                         </li>
                         <li class="repository">
-                            <p>CardHolder<span class="btn material-symbols-outlined unselectable">expand_more</span></p>
+                            <p class="repository__name">CardHolder<span class="arrow material-symbols-outlined unselectable repository__name__icon chocolate">expand_more</span></p>
                             <div class="time-container closed">2022-09-16T05:58:10Z</div>
                         </li>
                         <li class="repository">
-                            <p>cardHolderv2<span class="btn material-symbols-outlined unselectable">expand_more</span>
-                            </p>
+                            <p class="repository__name">cardHolderv2<span class="arrow material-symbols-outlined unselectable repository__name__icon chocolate">expand_more</span></p>
                             <div class="time-container closed">2022-09-16T06:25:16Z</div>
                         </li>
                         <li class="repository">
-                            <p>CV<span class="btn material-symbols-outlined unselectable">expand_more</span></p>
+                            <p class="repository__name">CV<span class="arrow material-symbols-outlined unselectable repository__name__icon chocolate">expand_more</span></p>
                             <div class="time-container closed">2022-09-01T15:02:56Z</div>
                         </li>
                         <li class="repository">
-                            <p>homework-js-coding<span
-                                    class="btn material-symbols-outlined unselectable">expand_more</span></p>
+                            <p class="repository__name">homework-js-coding<span class="arrow material-symbols-outlined unselectable repository__name__icon chocolate">expand_more</span></p>
                             <div class="time-container closed">2022-08-23T17:26:45Z</div>
                         </li>
                         <li class="repository">
-                            <p>landing-template<span
-                                    class="btn material-symbols-outlined unselectable">expand_more</span></p>
+                            <p class="repository__name">landing-template<span class="arrow material-symbols-outlined unselectable repository__name__icon chocolate">expand_more</span></p>
                             <div class="closed time-container">2022-08-26T19:07:13Z</div>
                         </li>
                         <li class="repository">
-                            <p>Learning<span class="btn material-symbols-outlined unselectable">expand_more</span></p>
+                            <p class="repository__name">Learning<span class="arrow material-symbols-outlined unselectable repository__name__icon chocolate">expand_more</span></p>
                             <div class="closed time-container">2022-05-21T15:21:54Z</div>
                         </li>
                         <li class="repository">
-                            <p>lvlUp-homework2<span
-                                    class="btn material-symbols-outlined unselectable">expand_more</span></p>
+                            <p class="repository__name">lvlUp-homework2<span class="arrow material-symbols-outlined unselectable repository__name__icon chocolate">expand_more</span></p>
                             <div class="closed time-container">2022-08-20T09:37:34Z</div>
                         </li>
                         <li class="repository">
-                            <p>lvlUp-homework3<span
-                                    class="btn material-symbols-outlined unselectable">expand_more</span></p>
+                            <p class="repository__name">lvlUp-homework3<span class="arrow material-symbols-outlined unselectable repository__name__icon chocolate">expand_more</span></p>
                             <div class="closed time-container">2022-08-14T17:58:27Z</div>
                         </li>
                         <li class="repository">
-                            <p>lvlUp-homework4<span
-                                    class="btn material-symbols-outlined unselectable">expand_more</span></p>
+                            <p class="repository__name">lvlUp-homework4<span class="arrow material-symbols-outlined unselectable repository__name__icon chocolate">expand_more</span></p>
                             <div class="closed time-container">2022-08-14T17:37:57Z</div>
                         </li>
                     </ul>
