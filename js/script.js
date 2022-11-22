@@ -1,7 +1,7 @@
 let inputUserNameField = document.getElementById('githubUserName');
 let userName = 'AlexTereschenko';
 let getBtn = document.getElementById('get-btn');
-let requestURL = 'https://api.github.com/users/'+userName+'/repos';
+const requestURL = 'https://api.github.com/users/';
 let repos = document.getElementById('repos');
 let repositories;
 let loading = document.querySelector('.loading');
@@ -11,7 +11,7 @@ let languages = document.getElementById('languages');
 let locations = document.getElementById('location');
 
 
-inputUserNameField.addEventListener("input", function() {
+inputUserNameField.addEventListener('input', function() {
     let inputUnspaced = [...document.getElementById('githubUserName').value].filter(e => e !== ' ').join('');
     userName = inputUserNameField.value ? inputUnspaced : 'AlexTereschenko';
 })
@@ -25,10 +25,7 @@ formElem.onsubmit = async (e) => {
 async function fetchRepos() {
     loading.classList.remove('hide');
     try {
-        let response = await fetch(`https://api.github.com/users/${userName}/repos`)
-        // if (!response.ok) {
-        //     throw new Error('Sorry, the specified user does not exist');
-        // }  
+        let response = await fetch(requestURL+userName+'/repos')
         let body = await response.json(); 
         repositories = body;
         loading.classList.add('hide');
@@ -39,8 +36,8 @@ async function fetchRepos() {
         getLocation()
         addRepos();
     } 
-    catch (error) {
-        // console.log(error);
+    catch {
+        return null;
     }
 }
 
@@ -54,7 +51,7 @@ function getPhoto() {
     }
     catch {
         logo.src = 'img/userDefault.png';
-        alert('Sorry, the specified user does not exist');
+        alert('Sorry, the specified user does not exist, you will be redirected to main page');
     }
 }
 
@@ -77,11 +74,11 @@ async function getLocation() {
     loading.classList.remove('hide');
 
     try {
-        await fetch(`https://api.github.com/users/${userName}`)
+        await fetch(requestURL+userName)
         .then((response) => {
-            // if (!response.ok) {
-            //     throw new Error('ohh no wrong username');
-            // }
+        if (response.status === 404) {
+            window.open('/', '_self'); //just a patch to avoid creating a separate 404 page
+        } 
             return response.json();
         })
         .then((data) => {
@@ -89,14 +86,9 @@ async function getLocation() {
             loading.classList.add('hide');
         });
     }
-    catch (error) {
+    catch {
         locations.innerHTML = null;
         loading.classList.add('hide');
-        // console.log(error);
-        // console.error('Error:', error);
-        // return error; // or you can return null;
-        // return null;
-
     }
 }
 
@@ -107,6 +99,7 @@ function addRepos() {
         li.className = 'repository';
 
         let firstBlock = document.createElement('p');
+        firstBlock.classList.add('repository__name');
         let name = document.createTextNode(repositories[i].name);
         let spanArrow = document.createElement('span');
         spanArrow.classList.add('btn');
@@ -114,6 +107,7 @@ function addRepos() {
         spanArrow.appendChild(spanText);
         spanArrow.classList.add('material-symbols-outlined');
         spanArrow.classList.add('unselectable');
+        spanArrow.classList.add('repository__name__icon');
         firstBlock.appendChild(name);
         firstBlock.appendChild(spanArrow);
         let secondBlock = document.createElement('div');
@@ -142,29 +136,31 @@ async function getLastCommitDate(repo, timeBlock) {
 }
 
 repos.addEventListener('click', function(event) {
+    const delay = 60000;
     let timeOfClick = new Date().getTime();
-    let timeDiff = (timeOfClick - event.target.nextElementSibling.dataset.LastRequestTime)>60000;
 
-    if (event.target.tagName === 'P') {
-        event.target.lastChild.classList.toggle('rotate-onclick');
-        event.target.nextElementSibling.classList.toggle('closed');
-        if(!event.target.nextElementSibling.dataset.LastRequestTime || timeDiff) {
-            event.target.nextElementSibling.dataset.LastRequestTime = timeOfClick;
-        };
-        if (event.target.nextElementSibling.textContent === '' || timeDiff) {
-            getLastCommitDate(event.target.firstChild.textContent, event.target.nextElementSibling);
-        };
+    if (event.target.classList.contains('repository__name')) {
+        clickChecking(event.target);
     }
-    if (event.target.tagName === 'SPAN') {
-        event.target.classList.toggle('rotate-onclick');
-        event.target.parentElement.nextElementSibling.classList.toggle('closed');
-        if(!event.target.parentElement.nextElementSibling.dataset.LastRequestTime || timeDiff) {
-            event.target.parentElement.nextElementSibling.dataset.LastRequestTime = timeOfClick;
+    if (event.target.classList.contains('repository__name__icon')) {
+        clickChecking(event.target.parentElement);
+    }
+
+    function clickChecking(clickTarget) {
+        let lastRequestTime = clickTarget.nextElementSibling.dataset.LastRequestTime;
+        let timeDiff = (timeOfClick - lastRequestTime)>delay;
+
+        clickTarget.lastChild.classList.toggle('rotate-onclick');
+        clickTarget.nextElementSibling.classList.toggle('closed');
+
+        if(!lastRequestTime || timeDiff) {
+            lastRequestTime = timeOfClick;
         };
-        if (event.target.parentElement.nextElementSibling.textContent === '' || timeDiff) {
-            getLastCommitDate(event.target.parentElement.firstChild.textContent, event.target.parentElement.nextElementSibling);
+        if (clickTarget.nextElementSibling.textContent === '' || timeDiff) {
+            getLastCommitDate(clickTarget.firstChild.textContent, clickTarget.nextElementSibling);
         };
     }
 });
 
-document.addEventListener("DOMContentLoaded", fetchRepos());
+
+document.addEventListener('DOMContentLoaded', fetchRepos());
