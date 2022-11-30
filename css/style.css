@@ -113,6 +113,16 @@ h2 {
     margin-left: 1.6rem;
 }
 
+.repository:hover {
+    background: #131313;
+    transition: 0.5s ease-in-out;
+}
+
+.repository__name__link:hover {
+    color: chocolate;
+    transition: 0.5s ease-in-out;
+}
+
 .material-symbols-outlined {
   font-variation-settings:
   'FILL' 0,
