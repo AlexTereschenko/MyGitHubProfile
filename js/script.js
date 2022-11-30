@@ -1,148 +1,92 @@
-let inputUserNameField = document.getElementById('githubUserName');
+const inputUserNameField = document.getElementById('githubUserName');
+const myName = document.getElementById('name');
+const myAvatar = document.getElementById('photo');
+const myLocations = document.getElementById('location');
+const repositoriesList = document.getElementById('repositories');
+const myLanguages = document.getElementById('languages');
+const loading = document.querySelector('.js-loading');
+
+const GITHUB_API_URL = 'https://api.github.com/';
+
 let userName = 'AlexTereschenko';
-const requestURL = 'https://api.github.com/';
-let repositoriesList = document.getElementById('repositories');
-let repositories;
-let loading = document.querySelector('.loading');
-let logo = document.getElementById('photo');
-let languagesList = document.getElementById('languages');
-let locations = document.getElementById('location');
 
-
-inputUserNameField.addEventListener('input', function() {
-    let inputUnspaced = [...inputUserNameField.value].filter(e => e !== ' ').join('');
-    userName = inputUserNameField.value ? inputUnspaced : 'AlexTereschenko';
-})
-
-formElem.onsubmit = async (e) => {
-    e.preventDefault();
-
-    fetchRepos()
+// methods
+function loadingScreenToggler(show = true) {
+    show ? loading.classList.remove('hide') : loading.classList.add('hide');
 };
 
-async function fetchRepos() {
-    loadingScreenAdder()
+async function getUserInfo() {
+    loadingScreenToggler();
     try {
-        let response = await fetch(`${requestURL}users/${userName}/repos`)
-        let body = await response.json(); 
-        repositories = body;
+        const response = await fetch(`${GITHUB_API_URL}users/${userName}`)
+        const userInfo = await response.json(); 
 
-        loadingScreenRemover();
-        getPhoto();
-        getName();
-        getLanguages();
-        getLocation()
-        addRepositories();
-    } 
-    catch {
-        return null;
-    }
-}
-
-function getName() {
-    document.getElementById('name').innerHTML = userName;
-}
-
-function getPhoto() {
-    try {
-        logo.src = repositories[0].owner.avatar_url;
-    }
-    catch {
-        logo.src = 'img/userDefault.png';
-        alert('Sorry, the specified user does not exist');
-    }
-}
-
-function getLanguages() {
-    try {
-        let langArr = [];
-        for (let i = 0; i < repositories.length; i++) {
-            langArr.push(repositories[i].language)
-        }
-        let uniqueLanguages = (langArr.filter((value, index, self) => ((self.indexOf(value) === index) && (value !== null)))).join(', ')
-        languagesList.innerHTML = uniqueLanguages;
-    }
-    catch {
-        languagesList.innerHTML = 'not defined';
-    }
-    
-}
-
-async function getLocation() {
-    loadingScreenAdder()
-
-    try {
-        await fetch(`${requestURL}users/${userName}`)
-        .then((response) => {
         if (response.status === 404) {
             throw new Error();
-        } 
-            return response.json();
-        })
-        .then((data) => {
-            locations.innerHTML = data.location ? data.location : 'not declared';
-            loadingScreenRemover();
-        });
-    }
+        };
+
+        myName.innerHTML = userName;
+        myAvatar.src = userInfo.avatar_url ? userInfo.avatar_url : 'img/userDefault.png';
+        myLocations.innerHTML = userInfo.location ? userInfo.location : 'not declared';
+
+        getRepositoriesInfo();
+    } 
     catch {
-        locations.innerHTML = null;
-        loadingScreenRemover();
-        userName = '404 invalid userName ;)';
-        getName();
-    }
-}
+        myName.innerHTML = '404 invalid userName ;)';
+        myAvatar.src = 'img/userDefault.png';
+        myLanguages.innerHTML = 'not declared';
+        myLocations.innerHTML = 'not declared';
+        repositoriesList.innerHTML = '';
+        alert('Sorry, the specified user does not exist');
+        loadingScreenToggler(false);
+    };
+};
 
-function addRepositories() {
+async function getRepositoriesInfo() {
+    const response = await fetch(`${GITHUB_API_URL}users/${userName}/repos`)
+    const repoInfo = await response.json(); 
+
+    // add languages
+    const langArr = [];
+    for (let i = 0; i < repoInfo.length; i++) {
+        langArr.push(repoInfo[i].language)
+    }
+    const uniqueLanguages = (langArr.filter((value, index, self) => ((self.indexOf(value) === index) && (value !== null)))).join(', ')
+    myLanguages.innerHTML = uniqueLanguages;
+
+    // add repositories
     repositoriesList.innerHTML = '';
-    for (let i = 0; i < repositories.length; i++) {
-        let li = document.createElement('li');
-        li.className = 'repository';
 
-        let p = document.createElement('p');
-        p.classList.add('repository__name');
-        let nameTextNode = document.createTextNode(repositories[i].name);
-        p.appendChild(nameTextNode);
+    const fullRepoList = repoInfo.reduce(function (acc, cur, i) {
+        cur = 
+        `<li class="repository">
+            <p class="repository__name"><a href="${repoInfo[i].html_url}" target="_blank" class="repository__name__link">${repoInfo[i].name}</a><span class="arrow material-symbols-outlined unselectable repository__name__icon chocolate">expand_more</span></p>
+            <div class="time-container closed" data--last-request-time=""></div>
+        </li>`;
+        return acc + cur;
+    }, '');
 
-        let span = document.createElement('span');
-        let arrowTextNode = document.createTextNode('expand_more');
-        span.appendChild(arrowTextNode);
-        span.classList.add('arrow');
-        span.classList.add('material-symbols-outlined');
-        span.classList.add('unselectable');
-        span.classList.add('repository__name__icon');
-        span.classList.add('chocolate');
+    repositoriesList.innerHTML = fullRepoList;
 
-        p.appendChild(span);
-
-        let div = document.createElement('div');
-        div.classList.add('closed');
-        div.classList.add('time-container');
-        let lastCommitTextNode = document.createTextNode('');
-        div.appendChild(lastCommitTextNode);
-        
-        li.appendChild(p);
-        li.appendChild(div);
-
-        repositoriesList.appendChild(li);
-    }
-}
+    loadingScreenToggler(false);
+};
 
 async function getLastCommitDate(repo, div) {
-    loadingScreenAdder()
-    await fetch(`${requestURL}repos/${userName}/${repo}/commits`)
-    .then((response) => {
-        return response.json();
-    })
-    .then((data) => {
-        div.innerHTML = `Last committed at ${data[0].commit.author.date}`;
-        loadingScreenRemover();
-    });
+    loadingScreenToggler();
+
+    const response = await fetch(`${GITHUB_API_URL}repos/${userName}/${repo}/commits`)
+    const commitDates = await response.json();
+    const [date, time] = (commitDates[0].commit.author.date).slice(0, -1).split('T')
+
+    div.innerHTML = `Last committed at ${time} / ${date}`;
+
+    loadingScreenToggler(false);
 }
 
 repositoriesList.addEventListener('click', function(event) {
-    let clickedEl = event.target;
+    const clickedEl = event.target;
     const delay = 60000;
-    let timeOfClick = new Date().getTime();
+    const timeOfClick = new Date().getTime();
 
     if (clickedEl.classList.contains('repository__name')) {
         clickChecking(clickedEl);
@@ -152,29 +96,36 @@ repositoriesList.addEventListener('click', function(event) {
     }
 
     function clickChecking(clickTarget) {
-        let nextToTarget = clickTarget.nextElementSibling;
-        let lastRequestTime = nextToTarget.dataset.LastRequestTime;
-        let timeDiff = (timeOfClick - lastRequestTime)>delay;
+        const nextToTarget = clickTarget.nextElementSibling;
 
-        clickTarget.lastChild.classList.toggle('rotate-onclick');
-        nextToTarget.classList.toggle('closed');
+        const lastRequestTime = nextToTarget.dataset.LastRequestTime ? 
+            nextToTarget.dataset.LastRequestTime :
+            nextToTarget.dataset.LastRequestTime = timeOfClick;
+        const timeDiff = (timeOfClick - lastRequestTime)>delay;
 
         if(!lastRequestTime || timeDiff) {
-            lastRequestTime = timeOfClick;
+            nextToTarget.dataset.LastRequestTime = timeOfClick
         };
+
+        clickTarget.firstChild.nextElementSibling.classList.toggle('rotate-onclick');
+        nextToTarget.classList.toggle('closed');
+
         if (nextToTarget.textContent === '' || timeDiff) {
             getLastCommitDate(clickTarget.firstChild.textContent, nextToTarget);
         };
     }
 });
 
-function loadingScreenAdder() {
-    loading.classList.remove('hide');
-}
+// listeners
+inputUserNameField.addEventListener('input', function() {
+    const inputUnspaced = [...inputUserNameField.value].filter(e => e !== ' ').join('');
+    userName = inputUserNameField.value ? inputUnspaced : 'AlexTereschenko';
+})
 
-function loadingScreenRemover() {
-    loading.classList.add('hide');
-}
+formElem.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    getUserInfo();
+})
 
-
-document.addEventListener('DOMContentLoaded', fetchRepos());
+document.addEventListener('DOMContentLoaded', getUserInfo);
