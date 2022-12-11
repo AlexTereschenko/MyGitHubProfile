@@ -230,7 +230,7 @@ repositoriesList.addEventListener('click', function(event) {
 
 // listeners
 inputUserNameField.addEventListener('input', function() {
-    const inputUnspaced = [...inputUserNameField.value].filter(e => e !== ' ').join('');
+    const inputUnspaced = inputUserNameField.value.trim();
     userName = inputUserNameField.value ? inputUnspaced : 'AlexTereschenko';
 })
 
